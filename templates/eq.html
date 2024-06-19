@@ -1,17 +1,104 @@
 <!DOCTYPE html>
-<html lang="ja">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>最新の地震情報</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>地震情報</title>
+    <script>
+        L_NO_TOUCH = false;
+        L_DISABLE_3D = false;
+    </script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            width: 40%;
+            max-width: 600px;
+            margin-right: 20px;
+        }
+        .card-header {
+            background-color: #2196F3;
+            color: white;
+            padding: 20px;
+            font-size: 1.5em;
+            text-align: center;
+        }
+        .card-content {
+            padding: 20px;
+        }
+        #map {
+            width: 40%;
+            height: 40vh;
+        }
+        
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
 </head>
-
 <body>
-    <h1>最新の地震情報</h1>
-    <p>地震発生時刻: {{ eqtime }}</p>
-    <p>マグニチュード: {{ magnitude }}</p>
-    <p>発生地: {{ eq_name }}</p>
-    <p>緯度, 経度: ({{ latitude }}, {{ longitude }})</p>
-</body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">一番最近の地震情報</div>
+            <div class="card-content">
+                <p>地震発生日： {{ eq_day }}</p>
+                <p>地震発生時間： {{ eq_time }}</p>
+                <p>発生地： {{ eq_name }}</p>
+                <p>津波： {{tunami}}</p>
+                <p>マグニチュード： {{ magnitude }}</p>
 
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <script>
+        var map = L.map('map', {
+            center: [{{ latitude }}, {{ longitude }}],
+            crs: L.CRS.EPSG3857,
+            zoom: 12,
+            zoomControl: true,
+            preferCanvas: false,
+        });
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            detectRetina: false,
+            maxNativeZoom: 19,
+            maxZoom: 19,
+            minZoom: 0,
+            noWrap: false,
+            opacity: 1,
+            subdomains: 'abc',
+            tms: false
+        }).addTo(map);
+
+        var marker = L.marker([{{ latitude }}, {{ longitude }}]).addTo(map);
+
+        var popup = L.popup({ maxWidth: '100%' });
+
+        var popupContent = $(`<div style="width: 100%; height: 100%;">Location: {{ eq_name }} Magnitude: {{ magnitude }} Date: {{ eq_day }} Time: {{ eq_time }}</div>`)[0];
+        popup.setContent(popupContent);
+
+        marker.bindPopup(popup);
+    </script>
+</body>
 </html>
